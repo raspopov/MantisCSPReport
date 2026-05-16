@@ -1,0 +1,30 @@
+name: Pack
+
+on: push
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Pack
+        run: |
+          mkdir -p pack/MantisCSPReport/
+          cp MantisCSPReport.php pack/MantisCSPReport/
+          cp -r lang pack/MantisCSPReport/
+          cp -r pages pack/MantisCSPReport/
+          cd pack/
+          zip -r ../MantisCSPReport.zip .
+
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        if: github.ref_type == 'tag'
+        with:
+          draft: true
+          files: MantisCSPReport.zip
+          tag_name: ${{ github.ref_name }}

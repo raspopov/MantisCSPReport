@@ -1,0 +1,17 @@
+<?php
+
+$s_plugin_MantisCSPReport_title = 'MantisBT CSP Report';
+$s_plugin_MantisCSPReport_description = 'A plugin for Content Security Policy (CSP) reporting.';
+
+$s_plugin_MantisCSPReport_config = 'MantisBT CSP Report : Configuration';
+$s_plugin_MantisCSPReport_enable_title = 'Enable';
+$s_plugin_MantisCSPReport_enable_details = 'Enable report collection.';
+$s_plugin_MantisCSPReport_ignore_title = 'Ignored sources';
+$s_plugin_MantisCSPReport_ignore_details = 'Reports from these sources, separated by commas, are ignored. Clear this field to reset to the default settings.';
+
+$s_plugin_MantisCSPReport_label = 'CSP Report';
+$s_plugin_MantisCSPReport_source = 'Source URI';
+$s_plugin_MantisCSPReport_line = 'Source Line';
+$s_plugin_MantisCSPReport_directive = 'Violated Directive';
+$s_plugin_MantisCSPReport_document = 'Document URI';
+$s_plugin_MantisCSPReport_blocked = 'Blocked URI';
