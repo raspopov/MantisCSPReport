@@ -27,7 +27,7 @@ $f_page_number = gpc_get_int( 'page_number', 1 );
 $t_date_format = config_get( 'normal_date_format' );
 
 $t_total_count = db_result( db_query( 'SELECT count(*) FROM ' . plugin_table( 'reports' ) ) );
-$t_per_page = 15;
+$t_per_page = 10;
 $t_page_count = ceil( $t_total_count / $t_per_page );
 if( $t_page_count < 1 ) {
 	$t_page_count = 1;

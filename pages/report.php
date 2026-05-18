@@ -25,60 +25,103 @@ if( !plugin_config_get( 'enable', ON ) ) {
 
 http_response_code( HTTP_STATUS_NO_CONTENT );
 
-# POST
-$t_post = file_get_contents( 'php://input' );
-if( $t_post ) {
-	# JSON
-	$t_data = json_decode( $t_post, true );
-	if( $t_data ) {
-		/* https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy/report-uri:
-		{
-			"csp-report": {
-				"document-uri": "http://localhost/my_view_page.php",
-				"referrer": "http://localhost/main_page.php",
-				"violated-directive": "style-src-elem",
-				"effective-directive": "style-src-elem",
-				"original-policy": "report-uri http://localhost/plugin.php?page=MantisCSPReport/report.php; default-src 'self'",
-				"disposition": "enforce",
-				"blocked-uri": "inline",
-				"line-number": 16,
-				"source-file": "http://localhost/my_view_page.php",
-				"status-code": 200,
-				"script-sample": ""
+/**
+ * Add a new report to the database
+ * @return void
+ */
+function report( $p_now, $p_source, $p_line, $p_directive, $p_document, $p_blocked ) {
+	if(    !is_null( $p_directive )
+		&& !is_null( $p_document )
+		&& !is_null( $p_blocked ) ) {
+
+		# Ignore self
+		if( str_contains( $p_document, plugin_page( '' ) ) ) {
+			return;
+		}
+
+		foreach( plugin_config_get( 'ignore' ) as $t_prefix ) {
+			if(    str_starts_with( $p_source, $t_prefix )
+				|| $p_directive === $t_prefix
+				|| str_starts_with( $p_blocked, $t_prefix )
+				|| str_starts_with( $p_document, $t_prefix ) ) {
+				return;
 			}
 		}
-		*/
-		#plugin_log_event( print_r( $t_data, true ) );
 
-		$t_source = $t_data['csp-report']['source-file'] ?? '';
-		$t_line = $t_data['csp-report']['line-number'] ?? 0;
-		$t_directive = $t_data['csp-report']['effective-directive'] ?? null;
-		$t_document = $t_data['csp-report']['document-uri'] ?? null;
-		$t_blocked = $t_data['csp-report']['blocked-uri'] ?? null;
+		db_param_push();
+		db_query( 'INSERT INTO ' . plugin_table( 'reports' )
+			. ' ( date, source, line, directive, document, blocked ) VALUES ( '
+			. db_param() . ', ' . db_param() . ', ' . db_param() . ', ' . db_param() . ', ' . db_param() . ', ' . db_param() . ' )',
+			[ $p_now, $p_source, $p_line, $p_directive, $p_document, $p_blocked ] );
 	}
 }
 
-if(    !is_null( $t_directive )
-	&& !is_null( $t_document )
-	&& !is_null( $t_blocked ) ) {
+# POST
+$t_post = @file_get_contents( 'php://input' );
+if( $t_post ) {
+	# JSON
+	$t_data = @json_decode( $t_post, true );
+	if( $t_data ) {
+		#plugin_log_event( json_encode( $t_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES ) );
 
-	# Ignore self
-	if( str_contains( $t_document, '/plugin.php?page=MantisCSPReport' ) ) {
-		exit;
-	}
-
-	foreach( plugin_config_get( 'ignore' ) as $t_prefix ) {
-		if(    str_starts_with( $t_source, $t_prefix )
-			|| $t_directive === $t_prefix
-			|| str_starts_with( $t_blocked, $t_prefix )
-			|| str_starts_with( $t_document, $t_prefix ) ) {
-			exit;
+		$t_now = db_now();
+		if( isset( $t_data['csp-report'] ) ) {
+			/* https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy/report-uri:
+			{
+				"csp-report": {
+					"document-uri": "https://localhost/my_view_page.php",
+					"referrer": "https://localhost/main_page.php",
+					"violated-directive": "style-src-elem",
+					"effective-directive": "style-src-elem",
+					"original-policy": "report-uri https://localhost/plugin.php?page=MantisCSPReport/report.php; default-src 'self'",
+					"disposition": "enforce",
+					"blocked-uri": "inline",
+					"line-number": 16,
+					"source-file": "https://localhost/my_view_page.php",
+					"status-code": 200,
+					"script-sample": ""
+				}
+			} */
+			report( $t_now,
+				$t_data['csp-report']['source-file'] ?? '',
+				$t_data['csp-report']['line-number'] ?? 0,
+				$t_data['csp-report']['effective-directive'] ?? null,
+				$t_data['csp-report']['document-uri'] ?? null,
+				$t_data['csp-report']['blocked-uri'] ?? null );
+		} elseif( is_array( $t_data ) ) {
+			foreach( $t_data as $t_report ) {
+				if( isset( $t_report['type'] ) && $t_report['type'] == "csp-violation" ) {
+					/* https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy/report-to:
+					[
+						{
+							"age": 38940,
+							"body": {
+								"blockedURL": "inline",
+								"disposition": "enforce",
+								"documentURL": "https://localhost/my_view_page.php",
+								"effectiveDirective": "style-src-elem",
+								"lineNumber": 16,
+								"originalPolicy": "report-to mantis; default-src 'self'; frame-ancestors 'none'; style-src 'self'; script-src 'self'; img-src 'self' data:",
+								"referrer": "https://localhost/view_all_bug_page.php",
+								"sample": "",
+								"sourceFile": "https://localhost/my_view_page.php",
+								"statusCode": 200
+							},
+							"type": "csp-violation",
+							"url": "https://localhost/my_view_page.php",
+							"user_agent": "Mozilla/5.0 ..."
+						},
+						...
+					] */
+					report( $t_now,
+						$t_report['body']['sourceFile'] ?? '',
+						$t_report['body']['lineNumber'] ?? 0,
+						$t_report['body']['effectiveDirective'] ?? null,
+						$t_report['body']['documentURL'] ?? null,
+						$t_report['body']['blockedURL'] ?? null );
+				}
+			}
 		}
 	}
-
-	db_param_push();
-	db_query( 'INSERT INTO ' . plugin_table( 'reports' )
-		. ' ( date, source, line, directive, document, blocked ) VALUES ( '
-		. db_param() . ', ' . db_param() . ', ' . db_param() . ', ' . db_param() . ', ' . db_param() . ', ' . db_param() . ' )',
-		[ db_now(), $t_source, $t_line, $t_directive, $t_document, $t_blocked ] );
 }
+

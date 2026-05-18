@@ -30,7 +30,7 @@ class MantisCSPReportPlugin extends MantisPlugin {
 		$this->description = plugin_lang_get( 'description' );
 		$this->page = 'config';
 
-		$this->version = '1.0.0';
+		$this->version = '1.1.0';
 		$this->requires = [
 			'MantisCore' => '2.0'
 		];
@@ -98,11 +98,12 @@ class MantisCSPReportPlugin extends MantisPlugin {
 	public function core_headers() {
 		if( plugin_config_get( 'enable', ON ) ) {
 			$t_url = plugin_page( 'report.php' );
-			http_csp_add( 'report-uri', $t_url );
-
-			# TODO: HTTPS only
-			#header( 'Reporting-Endpoints: default="' . $t_url . '"' );
-			#http_csp_add( 'report-to', 'default' );
+			if( http_is_protocol_https() ) {
+				http_csp_add( 'report-to', 'default' );
+				header( 'Reporting-Endpoints: default="' . $t_url . '"' );
+			} else {
+				http_csp_add( 'report-uri', $t_url );
+			}
 		}
 	}
 
