@@ -5,7 +5,9 @@
 ## Presentation
 
 This plugin allows you to enable the collection of CSP reports from MantisBT pages and view them to identify CSP configuration errors. The plugin inserts the "Content-Security-Policy: report-uri /plugin.php?page=MantisCSPReport/report.php" header and provides an endpoint for collecting reports from client browsers.
- 
+
+![MantisBT CSP Report View Screenshot](https://raw.githubusercontent.com/raspopov/MantisCSPReport/master/MantisCSPReport_view.png)
+
 ## System Requirements
 
 - MantisBT 2.
@@ -20,6 +22,8 @@ This plugin allows you to enable the collection of CSP reports from MantisBT pag
 ## Configuration
 
 - The plugin can be configured to ignore reports from "noisy" sources; by default, "moz-extension, chrome-extension, safari-extension, ms-browser-extension, edge-extension, about".
+
+![MantisBT CSP Report Configuration Screenshot](https://raw.githubusercontent.com/raspopov/MantisCSPReport/master/MantisCSPReport_config.png)
 
 ## Access Rights
 
