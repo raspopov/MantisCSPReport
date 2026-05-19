@@ -43,7 +43,7 @@ class MantisCSPReportPlugin extends MantisPlugin {
 		$this->description = plugin_lang_get( 'description' );
 		$this->page = 'config';
 
-		$this->version = '1.2.0';
+		$this->version = '1.2.1';
 		$this->requires = [
 			'MantisCore' => '2.0'
 		];
