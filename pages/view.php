@@ -31,16 +31,18 @@ $f_page_number = gpc_get_int( 'page_number', $t_page_number );
 $t_date_format = config_get( 'normal_date_format' );
 $t_table = plugin_table( 'reports' );
 if( $f_grouped ) {
-	$t_query_count = 'SELECT COUNT(*) FROM ' . $t_table
-		. ' WHERE id IN ( SELECT id FROM ' . $t_table
-		. ' GROUP BY directive, source, line )';
-	$t_query = 'SELECT *, COUNT(*) count FROM ' . $t_table
-		. ' GROUP BY directive, source, line'
-		. ' ORDER BY date ASC, source ASC, line ASC';
+	$t_query_count = "SELECT COUNT(*) count FROM (
+		SELECT directive, source, line
+		FROM $t_table
+		GROUP BY directive, source, line ) sub";
+	$t_query = "SELECT directive, source, line, COUNT(*) count,
+		MAX(document) document, MAX(blocked) blocked, MAX(date) date
+		FROM $t_table
+		GROUP BY directive, source, line
+		ORDER BY date ASC, source ASC, line ASC";
 } else {
-	$t_query_count = 'SELECT COUNT(*) FROM ' . $t_table;
-	$t_query = 'SELECT * FROM ' . $t_table
-		. ' ORDER BY date ASC, source ASC, line ASC';
+	$t_query_count = "SELECT COUNT(*) FROM $t_table";
+	$t_query = "SELECT * FROM $t_table ORDER BY date ASC, source ASC, line ASC";
 }
 
 # Paging
