@@ -24,9 +24,11 @@ access_ensure_global_level( config_get( 'manage_site_threshold' ) );
 
 form_security_purge( 'plugin_MantisCSPReport_action' );
 
-$f_clear = gpc_get_string( 'clear', '' );
-if( $f_clear === 'all' ) {
+if( gpc_get_string( 'clear', '' ) === 'all' ) {
 	db_query( 'DELETE FROM ' . plugin_table( 'reports' ) );
 }
 
-print_header_redirect( plugin_page( 'view.php', true ) );
+print_header_redirect( helper_url_combine( plugin_page( 'view.php', true ), [
+	'page_number' => gpc_get_int( 'page_number', 1 ),
+	'grouped' => gpc_get_bool( 'grouped', false ),
+] ) );

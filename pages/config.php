@@ -22,6 +22,10 @@ auth_reauthenticate();
 
 access_ensure_global_level( config_get( 'manage_plugin_threshold' ) );
 
+$t_enable = plugin_config_get( 'enable', MantisCSPReportPlugin::DEFAULT_ENABLE );
+$t_ignore = plugin_config_get( 'ignore', MantisCSPReportPlugin::DEFAULT_IGNORE );
+$t_aging = plugin_config_get( 'aging', MantisCSPReportPlugin::DEFAULT_AGING );
+
 layout_page_header( plugin_lang_get( 'config' ) );
 
 layout_page_begin( 'manage_overview_page.php' );
@@ -38,7 +42,7 @@ print_manage_menu( 'manage_plugin_page.php' );
 				<div class="widget-header widget-header-small">
 					<h4 class="widget-title lighter">
 						<?php print_icon( 'fa-sliders', 'ace-icon' ) ?>
-						<?php echo string_html_specialchars( plugin_lang_get( 'config' ) ) ?>
+						<?php echo plugin_lang_get( 'config' ) ?>
 					</h4>
 				</div>
 
@@ -48,32 +52,43 @@ print_manage_menu( 'manage_plugin_page.php' );
 							<table class="table table-bordered table-condensed table-striped">
 								<tbody>
 									<tr>
-										<th class="category width-40"><?php echo string_html_specialchars( plugin_lang_get( 'enable_title' ) ) ?><br/>
-											<span class="small"><?php echo string_html_specialchars( plugin_lang_get( 'enable_details' ) ) ?></span>
+										<th class="category width-40"><?php echo plugin_lang_get( 'enable_title' ) ?><br/>
+											<span class="small"><?php echo plugin_lang_get( 'enable_details' ) ?></span>
 										</th>
 										<td>
 											<label class="width-40">
-												<input type="radio" name="enable" value="1" class="ace" <?php check_checked( plugin_config_get( 'enable' ), ON ) ?>>
+												<input type="radio" name="enable" value="1" class="ace" <?php check_checked( $t_enable, ON ) ?>>
 												<span class="lbl padding-6"><?php echo lang_get( 'yes' ) ?></span>
 											</label>
 											<label class="width-40">
-												<input type="radio" name="enable" value="0" class="ace" <?php check_checked( plugin_config_get( 'enable' ), OFF ) ?>>
+												<input type="radio" name="enable" value="0" class="ace" <?php check_checked( $t_enable, OFF ) ?>>
 												<span class="lbl padding-6"><?php echo lang_get( 'no' ) ?></span>
 											</label>
 										</td>
 									</tr>
+
 									<tr>
-										<th class="category width-40"><?php echo string_html_specialchars( plugin_lang_get( 'ignore_title' ) ) ?><br/>
-											<span class="small"><?php echo string_html_specialchars( plugin_lang_get( 'ignore_details' ) ) ?></span>
+										<th class="category width-40"><?php echo plugin_lang_get( 'ignore_title' ) ?><br/>
+											<span class="small"><?php echo plugin_lang_get( 'ignore_details' ) ?></span>
 										</th>
 										<td>
-											<textarea class="form-control" name="ignore"><?php echo string_html_specialchars( implode( ', ', plugin_config_get( 'ignore' ) ) ) ?></textarea>
+											<textarea class="form-control" name="ignore"><?php echo string_html_specialchars( implode( ', ', $t_ignore ) ) ?></textarea>
 										</td>
 									</tr>
+
+									<tr>
+										<th class="category width-40"><?php echo plugin_lang_get( 'aging_title' ) ?><br/>
+											<span class="small"><?php echo plugin_lang_get( 'aging_details' ) ?></span>
+										</th>
+										<td>
+											<input class="input-sm" name="aging" size="8" maxlength="8" value="<?php echo $t_aging ?>" type="text">
+										</td>
+									</tr>
+
 								</tbody>
 							</table>
 							<div class="widget-toolbox padding-8 clearfix">
-								<input class="btn btn-primary btn-sm btn-white btn-round" value="<?php echo string_html_specialchars( lang_get( 'change_configuration' ) ) ?>" type="submit">
+								<input class="btn btn-primary btn-sm btn-white btn-round" value="<?php echo lang_get( 'change_configuration' ) ?>" type="submit">
 							</div>
 						</div>
 					</div>

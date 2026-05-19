@@ -24,19 +24,27 @@ access_ensure_global_level( config_get( 'manage_plugin_threshold' ) );
 
 form_security_purge( 'plugin_MantisCSPReport_update' );
 
-$t_enable = gpc_get_int( 'enable', ON );
-if( isset( $t_enable ) && $t_enable === OFF ) {
-	plugin_config_set( 'enable', OFF );
+$f_enable = gpc_get_int( 'enable', MantisCSPReportPlugin::DEFAULT_ENABLE );
+$f_ignore = array_filter( preg_split( '/[\s,]+/', gpc_get_string( 'ignore', MantisCSPReportPlugin::DEFAULT_IGNORE ) ),
+	function( $p_key ) { return strlen( $p_key ); } );
+$f_aging = gpc_get_int( 'aging', MantisCSPReportPlugin::DEFAULT_AGING );
+
+if( $f_enable != MantisCSPReportPlugin::DEFAULT_ENABLE ) {
+	plugin_config_set( 'enable', $f_enable );
 } else {
 	plugin_config_delete( 'enable' );
 }
 
-$t_ignore = array_filter( preg_split( '/[\s,]+/', gpc_get_string( 'ignore' ) ),
-	function( $p_key ) { return strlen( $p_key ); } );
-if( $t_ignore ) {
-	plugin_config_set( 'ignore', $t_ignore );
+if( $f_ignore && $f_ignore != MantisCSPReportPlugin::DEFAULT_IGNORE ) {
+	plugin_config_set( 'ignore', $f_ignore );
 } else {
 	plugin_config_delete( 'ignore' );
+}
+
+if( $f_aging && $f_aging != MantisCSPReportPlugin::DEFAULT_AGING ) {
+	plugin_config_set( 'aging', $f_aging );
+} else {
+	plugin_config_delete( 'aging' );
 }
 
 print_header_redirect( plugin_page( 'config.php', true ) );

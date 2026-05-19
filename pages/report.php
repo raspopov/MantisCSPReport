@@ -18,7 +18,7 @@
  * Copyright (C) 2026 Nikolay Raspopov <raspopov@cherubicsoft.com>
  */
 
-if( !plugin_config_get( 'enable', ON ) ) {
+if( ON != plugin_config_get( 'enable', MantisCSPReportPlugin::DEFAULT_ENABLE ) ) {
 	http_response_code( HTTP_STATUS_UNAVAILABLE );
 	exit;
 }
@@ -29,7 +29,7 @@ http_response_code( HTTP_STATUS_NO_CONTENT );
  * Add a new report to the database
  * @return void
  */
-function report( $p_now, $p_source, $p_line, $p_directive, $p_document, $p_blocked ) {
+function report( int $p_now, $p_source, $p_line, $p_directive, $p_document, $p_blocked ) {
 	if(    !is_null( $p_directive )
 		&& !is_null( $p_document )
 		&& !is_null( $p_blocked ) ) {
@@ -39,18 +39,24 @@ function report( $p_now, $p_source, $p_line, $p_directive, $p_document, $p_block
 			return;
 		}
 
-		foreach( plugin_config_get( 'ignore' ) as $t_prefix ) {
-			if(    str_starts_with( $p_source, $t_prefix )
-				|| $p_directive === $t_prefix
-				|| str_starts_with( $p_blocked, $t_prefix )
-				|| str_starts_with( $p_document, $t_prefix ) ) {
+		$t_ignore = plugin_config_get( 'ignore', MantisCSPReportPlugin::DEFAULT_IGNORE );
+		foreach( $t_ignore as $t_prefix ) {
+			if( $p_directive === $t_prefix
+				|| str_contains( $p_source, $t_prefix )
+				|| str_contains( $p_blocked, $t_prefix )
+				|| str_contains( $p_document, $t_prefix ) ) {
 				return;
 			}
 		}
+		
+		$t_table = plugin_table( 'reports' );
+		$t_aging = plugin_config_get( 'aging', MantisCSPReportPlugin::DEFAULT_AGING );
 
 		db_param_push();
-		db_query( 'INSERT INTO ' . plugin_table( 'reports' )
-			. ' ( date, source, line, directive, document, blocked ) VALUES ( '
+		db_query( 'DELETE FROM ' . $t_table . ' WHERE date < ' . db_param(), [ $p_now - $t_aging ] );
+
+		db_param_push();
+		db_query( 'INSERT INTO ' . $t_table . ' ( date, source, line, directive, document, blocked ) VALUES ( '
 			. db_param() . ', ' . db_param() . ', ' . db_param() . ', ' . db_param() . ', ' . db_param() . ', ' . db_param() . ' )',
 			[ $p_now, $p_source, $p_line, $p_directive, $p_document, $p_blocked ] );
 	}

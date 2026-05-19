@@ -20,6 +20,19 @@
 
 class MantisCSPReportPlugin extends MantisPlugin {
 
+	public const DEFAULT_ENABLE = ON;
+	public const DEFAULT_IGNORE = [
+		'moz-extension',
+		'chrome-extension',
+		'safari-extension',
+		'ms-browser-extension',
+		'edge-extension',
+		'about',
+	];
+	public const DEFAULT_AGING = 24 * 60 * 60;
+	public const DEFAULT_GROUPED = ON;
+	public const DEFAULT_PAGE_NUMBER = 1;
+
 	/**
 	 * A method that populates the plugin information and minimum requirements.
 	 *
@@ -30,7 +43,7 @@ class MantisCSPReportPlugin extends MantisPlugin {
 		$this->description = plugin_lang_get( 'description' );
 		$this->page = 'config';
 
-		$this->version = '1.1.0';
+		$this->version = '1.2.0';
 		$this->requires = [
 			'MantisCore' => '2.0'
 		];
@@ -47,15 +60,11 @@ class MantisCSPReportPlugin extends MantisPlugin {
 	 */
 	function config() {
 		return [
-			'enable' => ON,
-			'ignore' => [
-				'moz-extension',
-				'chrome-extension',
-				'safari-extension',
-				'ms-browser-extension',
-				'edge-extension',
-				'about',
-			],
+			'enable' => self::DEFAULT_ENABLE,
+			'ignore' => self::DEFAULT_IGNORE,
+			'aging' => self::DEFAULT_AGING,
+			'grouped' => self::DEFAULT_GROUPED,
+			'page_number' => self::DEFAULT_PAGE_NUMBER,
 		];
 	}
 
@@ -77,16 +86,18 @@ class MantisCSPReportPlugin extends MantisPlugin {
 	 * @return array
 	 */
 	public function schema() {
+		$t_table = plugin_table( 'reports' );
 		return [
-			[ 'CreateTableSQL', [ plugin_table( 'reports' ), "
+			[ 'CreateTableSQL', [ $t_table , "
 				id        I  NOTNULL PRIMARY AUTOINCREMENT,
 				date      I  NOTNULL,
 				source    XL NOTNULL,
 				line      I  NOTNULL,
 				directive XL NOTNULL,
 				document  XL NOTNULL,
-				blocked   XL NOTNULL
-			" ] ],
+				blocked   XL NOTNULL" ] ],
+			[ 'CreateIndexSQL', [ 'idx_' . $this->basename . '_source',
+				$t_table, [ 'source', 'line', 'directive' ] ] ],
 		];
 	}
 
@@ -96,7 +107,7 @@ class MantisCSPReportPlugin extends MantisPlugin {
 	 * @return void
 	 */
 	public function core_headers() {
-		if( plugin_config_get( 'enable', ON ) ) {
+		if( ON == plugin_config_get( 'enable', self::DEFAULT_ENABLE ) ) {
 			$t_url = plugin_page( 'report.php' );
 			if( http_is_protocol_https() ) {
 				http_csp_add( 'report-to', 'default' );
