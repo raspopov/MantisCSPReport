@@ -45,7 +45,10 @@ class MantisCSPReportPlugin extends MantisPlugin {
 
 		$this->version = '1.2.1';
 		$this->requires = [
-			'MantisCore' => '2.0'
+			'MantisCore' => '2.28'
+		];
+		$this->uses = [
+			'MantisGraph' => '2.28',
 		];
 
 		$this->author = 'Nikolay Raspopov';
@@ -116,6 +119,15 @@ class MantisCSPReportPlugin extends MantisPlugin {
 				http_csp_add( 'report-uri', $t_url );
 			}
 		}
+
+		# Load Mantis Graph if installed
+		if( plugin_is_loaded( 'MantisGraph' ) ) {
+			if( gpc_get_string( 'page', '' ) === $this->basename . '/graphs.php' ) {
+				$t_mantisgraph = plugin_get( 'MantisGraph' );
+				$t_mantisgraph->include_chartjs();
+				require_js( [ plugin_file( 'MantisGraph.js', false, $t_mantisgraph->basename ) ] );
+			}
+		}
 	}
 
 	/**
@@ -124,6 +136,49 @@ class MantisCSPReportPlugin extends MantisPlugin {
 	 * @return array
 	 */
 	function menu_manage() {
-		return [ '<a href="' . plugin_page( 'view.php' ) . '">' . plugin_lang_get( 'label' ) . '</a>' ];
+		$t_menu []= '<a href="' . plugin_page( 'view.php' ) . '">' . plugin_lang_get( 'view' ) . '</a>';
+		if( function_exists( 'graph_bar' ) ) {
+			$t_menu []= '<a href="' . plugin_page( 'graphs.php' ) . '">' . plugin_lang_get( 'graphs' ) . '</a>';
+		}
+		return $t_menu;
+	}
+	
+	/**
+	 * Limit string.
+	 *
+	 * @param string $p_text  Text.
+	 * @param int    $p_limit Max length.
+	 * @return string
+	 */
+	static function limit_text( string $p_text, int $p_limit = 48 ) {
+		$t_length = strlen( $p_text );
+		return ( $t_length > $p_limit )
+		 ? substr( $p_text, 0, $p_limit / 2 - 1 ) . mb_chr( 8230 ) . substr( $p_text, $t_length - $p_limit / 2 )
+		 : $p_text;
+	}
+
+	/**
+	 * Strip the $g_path.
+	 *
+	 * @param string $p_url Url or text.
+	 * @return string
+	 */
+	static function strip_path( string $p_url ) {
+		$t_path = config_get_global( 'path' );
+		return str_starts_with( $p_url, $t_path ) ? substr( $p_url, strlen( $t_path ) ) : $p_url;
+	}
+
+	/**
+	 * Make a link if possible.
+	 *
+	 * @param string $p_url Url or text.
+	 * @return string
+	 */
+	static function make_link( string $p_url ) {
+		return ( str_starts_with( strtolower( $p_url ), 'http://' ) ||
+				 str_starts_with( strtolower( $p_url ), 'https://' ) )
+			? '<a href="' . string_attribute( $p_url ) . '">' 
+				. string_attribute( self::limit_text( self::strip_path( $p_url ) ) ) . '</a>'
+			: string_attribute( self::limit_text( $p_url ) );
 	}
 }

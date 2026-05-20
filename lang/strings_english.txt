@@ -12,10 +12,14 @@ $s_plugin_MantisCSPReport_aging_title = 'Max age (seconds)';
 $s_plugin_MantisCSPReport_aging_details = 'Delete reports that are older than the specified age in seconds. Clear this field to reset to the default settings.';
 $s_plugin_MantisCSPReport_grouped = 'Grouped By Source';
 
-$s_plugin_MantisCSPReport_label = 'CSP Report';
+$s_plugin_MantisCSPReport_view = 'CSP Report';
+$s_plugin_MantisCSPReport_graphs = 'CSP Graphs';
+
 $s_plugin_MantisCSPReport_source = 'Source File';
 $s_plugin_MantisCSPReport_line = 'Source Line';
 $s_plugin_MantisCSPReport_count = 'Count';
 $s_plugin_MantisCSPReport_directive = 'Violated Directive';
 $s_plugin_MantisCSPReport_document = 'Document URI';
 $s_plugin_MantisCSPReport_blocked = 'Blocked URI';
+
+$s_plugin_MantisCSPReport_graph_warning = 'Please enable the Mantis Graphs plugin to view the charts.';

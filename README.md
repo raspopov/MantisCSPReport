@@ -6,7 +6,11 @@
 
 This plugin allows you to enable the collection of CSP reports from MantisBT pages and view them to identify CSP configuration errors. The plugin inserts the "Content-Security-Policy: report-uri /plugin.php?page=MantisCSPReport/report.php" header and provides an endpoint for collecting reports from client browsers.
 
-![MantisBT CSP Report View Screenshot](https://raw.githubusercontent.com/raspopov/MantisCSPReport/master/MantisCSPReport_view.png)
+![MantisBT CSP Report - CSP Report View Screenshot](https://raw.githubusercontent.com/raspopov/MantisCSPReport/master/MantisCSPReport_view.png)
+
+The plugin also provides some basic statistics:
+
+![MantisBT CSP Report - CSP Graphs Screenshot](https://raw.githubusercontent.com/raspopov/MantisCSPReport/master/MantisCSPReport_graphs.png)
 
 ## System Requirements
 
@@ -21,9 +25,11 @@ This plugin allows you to enable the collection of CSP reports from MantisBT pag
 
 ## Configuration
 
-- The plugin can be configured to ignore reports from "noisy" sources; by default, "moz-extension, chrome-extension, safari-extension, ms-browser-extension, edge-extension, about".
+- Report retrieval can be temporarily suspended using the "Enable" setting.
+- The plugin can be configured to ignore reports from "noisy" sources using the "Ignored sources" setting; by default, "moz-extension, chrome-extension, safari-extension, ms-browser-extension, edge-extension, about".
+- The plugin automatically deletes old reports based on the "Max age" setting, which is specified in seconds. Reports are deleted each time a new one is received.
 
-![MantisBT CSP Report Configuration Screenshot](https://raw.githubusercontent.com/raspopov/MantisCSPReport/master/MantisCSPReport_config.png)
+![MantisBT CSP Report - Configuration Screenshot](https://raw.githubusercontent.com/raspopov/MantisCSPReport/master/MantisCSPReport_config.png)
 
 ## Access Rights
 

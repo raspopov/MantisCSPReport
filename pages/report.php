@@ -18,13 +18,6 @@
  * Copyright (C) 2026 Nikolay Raspopov <raspopov@cherubicsoft.com>
  */
 
-if( ON != plugin_config_get( 'enable', MantisCSPReportPlugin::DEFAULT_ENABLE ) ) {
-	http_response_code( HTTP_STATUS_UNAVAILABLE );
-	exit;
-}
-
-http_response_code( HTTP_STATUS_NO_CONTENT );
-
 /**
  * Add a new report to the database
  * @return void
@@ -61,6 +54,13 @@ function report( int $p_now, $p_source, $p_line, $p_directive, $p_document, $p_b
 			[ $p_now, $p_source, $p_line, $p_directive, $p_document, $p_blocked ] );
 	}
 }
+
+if( ON != plugin_config_get( 'enable', MantisCSPReportPlugin::DEFAULT_ENABLE ) ) {
+	http_response_code( HTTP_STATUS_UNAVAILABLE );
+	exit;
+}
+
+http_response_code( HTTP_STATUS_NO_CONTENT );
 
 # POST
 $t_post = @file_get_contents( 'php://input' );

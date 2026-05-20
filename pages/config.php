@@ -33,6 +33,18 @@ layout_page_begin( 'manage_overview_page.php' );
 print_manage_menu( 'manage_plugin_page.php' );
 ?>
 <div class="col-md-12 col-xs-12">
+<?php
+if( !function_exists( 'graph_bar' ) ) {
+?>
+	<div class="space-10"></div>
+	<div class="alert alert-warning padding-8">
+		<ul>
+			<li><?php echo plugin_lang_get( 'graph_warning' ) ?></li>
+		</ul>
+	</div>
+<?php
+}
+?>
 	<div class="space-10"></div>
 	<div class="form-container">
 		<form action="<?php echo plugin_page( 'update.php' ) ?>" method="post">

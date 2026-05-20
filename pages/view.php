@@ -22,14 +22,14 @@ auth_reauthenticate();
 
 access_ensure_global_level( config_get( 'manage_site_threshold' ) );
 
+$t_table = plugin_table( 'reports' );
+$t_date_format = config_get( 'normal_date_format' );
 $t_grouped = (int)plugin_config_get( 'grouped', MantisCSPReportPlugin::DEFAULT_GROUPED );
 $t_page_number = (int)plugin_config_get( 'page_number', MantisCSPReportPlugin::DEFAULT_PAGE_NUMBER );
 
 $f_grouped = gpc_get_bool( 'grouped', $t_grouped );
 $f_page_number = gpc_get_int( 'page_number', $t_page_number );
 
-$t_date_format = config_get( 'normal_date_format' );
-$t_table = plugin_table( 'reports' );
 if( $f_grouped ) {
 	$t_query_count = "SELECT COUNT(*) count FROM (
 		SELECT directive, source, line
@@ -39,15 +39,16 @@ if( $f_grouped ) {
 		MAX(document) document, MAX(blocked) blocked, MAX(date) date
 		FROM $t_table
 		GROUP BY directive, source, line
-		ORDER BY date ASC, source ASC, line ASC";
+		ORDER BY source ASC, line ASC, document ASC, date ASC";
 } else {
 	$t_query_count = "SELECT COUNT(*) FROM $t_table";
-	$t_query = "SELECT * FROM $t_table ORDER BY date ASC, source ASC, line ASC";
+	$t_query = "SELECT * FROM $t_table
+		ORDER BY source ASC, line ASC, document ASC, date ASC";
 }
 
 # Paging
 $t_total_count = db_result( db_query( $t_query_count ) );
-$t_per_page = 10;
+$t_per_page = 15;
 $t_page_count = ceil( $t_total_count / $t_per_page );
 if( $t_page_count < 1 ) {
 	$t_page_count = 1;
@@ -79,7 +80,7 @@ if( $f_page_number != $t_page_number ) {
 	}
 }
 
-layout_page_header( plugin_lang_get( 'title' ) );
+layout_page_header( plugin_lang_get( 'view' ) );
 
 layout_page_begin( 'manage_overview_page.php' );
 
@@ -108,12 +109,12 @@ print_manage_menu( 'view.php' );
 								<tbody>
 									<tr>
 										<th class="category"></th>
-										<th class="category"><?php echo plugin_lang_get( 'directive' ) ?></th>
 										<th class="category"><?php echo plugin_lang_get( 'source' ) ?></th>
 										<th class="category center"><?php echo plugin_lang_get( 'line' ) ?></th>
 <?php							if( $f_grouped ) { ?>
 										<th class="category center"><?php echo plugin_lang_get( 'count' ) ?></th>
 <?php							} ?>
+										<th class="category"><?php echo plugin_lang_get( 'directive' ) ?></th>
 										<th class="category"><?php echo plugin_lang_get( 'document' ) ?></th>
 										<th class="category"><?php echo plugin_lang_get( 'blocked' ) ?></th>
 										<th class="category"><?php echo lang_get( 'date_submitted' ) ?></th>
@@ -121,14 +122,14 @@ print_manage_menu( 'view.php' );
 <?php							while( $t_row = db_fetch_array( $t_result ) ) { ?>
 									<tr>
 										<td><?php echo ++$t_offset ?></td>
-										<td><?php echo string_attribute( $t_row['directive'] ) ?></td>
-										<td><?php echo string_display_line_links( $t_row['source'] ) ?></td>
+										<td><?php echo MantisCSPReportPlugin::make_link( $t_row['source'] ) ?></td>
 										<td class="center"><?php echo string_attribute( $t_row['line'] ) ?></td>
 <?php								if( $f_grouped ) { ?>
-										<td class="center"><?php echo string_display_line_links( $t_row['count'] ) ?></td>
+										<td class="center"><?php echo MantisCSPReportPlugin::make_link( $t_row['count'] ) ?></td>
 <?php								} ?>
-										<td><?php echo string_display_line_links( $t_row['document'] ) ?></td>
-										<td><?php echo string_display_line_links( $t_row['blocked'] ) ?></td>
+										<td><?php echo string_attribute( $t_row['directive'] ) ?></td>
+										<td><?php echo MantisCSPReportPlugin::make_link( $t_row['document'] ) ?></td>
+										<td><?php echo MantisCSPReportPlugin::make_link( $t_row['blocked'] ) ?></td>
 										<td><?php echo date( $t_date_format, $t_row['date'] ) ?></td>
 									</tr>
 <?php							} ?>
