@@ -48,7 +48,8 @@ if( function_exists( 'graph_bar' ) ) {
 		$t_result = db_query( "SELECT $t_graph, COUNT(*) count FROM $t_table GROUP BY $t_graph ORDER BY count DESC LIMIT 5" );
 		$t_bars = [];
 		while( $t_row = db_fetch_array( $t_result ) ) {
-			$t_bars[MantisCSPReportPlugin::limit_text( MantisCSPReportPlugin::strip_path( $t_row[$t_graph] ) )] = $t_row['count'];
+			$t_bars[MantisCSPReportPlugin::limit_text(
+				MantisCSPReportPlugin::strip_path( $t_row[$t_graph] ?: ( '(' . lang_get( 'none' ) . ')' ) ) )] = $t_row['count'];
 		}
 		graph_bar( $t_bars, 3, true );
 ?>

@@ -32,7 +32,7 @@ $f_page_number = gpc_get_int( 'page_number', $t_page_number );
 
 if( $f_grouped ) {
 	$t_query_count = "SELECT COUNT(*) count FROM (
-		SELECT directive, source, line
+		SELECT id
 		FROM $t_table
 		GROUP BY directive, source, line ) sub";
 	$t_query = "SELECT directive, source, line, COUNT(*) count,
@@ -122,7 +122,7 @@ print_manage_menu( 'view.php' );
 <?php							while( $t_row = db_fetch_array( $t_result ) ) { ?>
 									<tr>
 										<td><?php echo ++$t_offset ?></td>
-										<td><?php echo MantisCSPReportPlugin::make_link( $t_row['source'] ) ?></td>
+										<td><?php echo MantisCSPReportPlugin::make_link( $t_row['source'] ?: ( '(' . lang_get( 'none' ) . ')' ) ) ?></td>
 										<td class="center"><?php echo string_attribute( $t_row['line'] ) ?></td>
 <?php								if( $f_grouped ) { ?>
 										<td class="center"><?php echo MantisCSPReportPlugin::make_link( $t_row['count'] ) ?></td>

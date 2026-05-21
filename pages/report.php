@@ -68,7 +68,7 @@ if( $t_post ) {
 	# JSON
 	$t_data = @json_decode( $t_post, true );
 	if( $t_data ) {
-		#plugin_log_event( json_encode( $t_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES ) );
+		#plugin_log_event( json_encode( $t_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE ) );
 
 		$t_now = db_now();
 		if( isset( $t_data['csp-report'] ) ) {
